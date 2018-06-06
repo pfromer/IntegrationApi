@@ -14,7 +14,7 @@ def get_users():
         endpoint = platform['endpoint'] + "users"
         platformName = platform['name']
         r = requests.get(url=endpoint, headers=headers)
-        users[platformName] = r.json()
+        users[platformName] = r.json()['users']
     return jsonify({'users': users})
 
 
@@ -72,17 +72,22 @@ def new_message():
     if not request.json:
         abort(400)
 
+    for platform in json.loads(platforms):
+        if platform['token'] == request.json['token']:
+            platformName = platform['name']
+
     message = {
         "roomOriginalPlatform": request.json['roomOriginalPlatform'],
         "roomId": request.json['roomId'],
         "senderId": request.json['senderId'],
-        "senderPlatform": request.json['senderPlatform'],
+        "senderPlatform": platformName,
         "text": request.json['text']
     }
 
     for platform in json.loads(platforms):
-        endpoint = platform['endpoint'] + "message"
-        requests.post(url=endpoint, data=json.dumps(message), headers=headers)
+        if platform['token'] != request.json['token']:
+            endpoint = platform['endpoint'] + "message"
+            requests.post(url=endpoint, data=json.dumps(message), headers=headers)
     return "success"
 
 
