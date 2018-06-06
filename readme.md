@@ -1,4 +1,7 @@
+EJEMPLOS DE USO
+}
 
+---------------------------------
 GET
 http://localhost:5000/users
 ---------------------------------
@@ -26,7 +29,7 @@ http://localhost:5000/room
 
 -----------------------------------
 POST
-http://localhost:5000/text
+http://localhost:5000/message
 
 {
         "idFrom": "5",
