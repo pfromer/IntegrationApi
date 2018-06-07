@@ -6,6 +6,7 @@ from platforms import platforms
 app = Flask(__name__)
 headers = {'content-type': 'application/json'}
 
+
 @app.route('/users', methods=['GET'])
 def get_users():
     users = {}
@@ -24,9 +25,7 @@ def new_user():
     if not request.json:
         abort(400)
 
-    for platform in json.loads(platforms):
-        if platform['token'] == request.json['token']:
-            platformName = platform['name']
+    platformName = getPlatformByToken(request.json['token']);
 
     user = {
         "id": request.json['id'],
@@ -34,10 +33,7 @@ def new_user():
         "platform": platformName
     }
 
-    for platform in json.loads(platforms):
-        if platform['token'] != request.json['token']:
-            endpoint = platform['endpoint'] + "user"
-            requests.post(url=endpoint, data=json.dumps(user), headers=headers)
+    forwardToOhterPlatforms(platformName, "user", user);
     return "success"
 
 
@@ -47,9 +43,7 @@ def new_room():
     if not request.json:
         abort(400)
 
-    for platform in json.loads(platforms):
-        if platform['token'] == request.json['token']:
-            platformName = platform['name']
+    platformName = getPlatformByToken(request.json['token']);
 
     room = {
         "id": request.json['id'],
@@ -59,12 +53,8 @@ def new_room():
         "type": request.json['type']
     }
 
-    for platform in json.loads(platforms):
-        if platform['token'] != request.json['token']:
-            endpoint = platform['endpoint'] + "room"
-            requests.post(url=endpoint, data=json.dumps(room), headers=headers)
+    forwardToOhterPlatforms(platformName, "room", room);
     return "success"
-
 
 
 @app.route('/message', methods=['POST'])
@@ -72,9 +62,7 @@ def new_message():
     if not request.json:
         abort(400)
 
-    for platform in json.loads(platforms):
-        if platform['token'] == request.json['token']:
-            platformName = platform['name']
+    platformName = getPlatformByToken(request.json['token']);
 
     message = {
         "roomOriginalPlatform": request.json['roomOriginalPlatform'],
@@ -84,11 +72,21 @@ def new_message():
         "text": request.json['text']
     }
 
-    for platform in json.loads(platforms):
-        if platform['token'] != request.json['token']:
-            endpoint = platform['endpoint'] + "message"
-            requests.post(url=endpoint, data=json.dumps(message), headers=headers)
+    forwardToOhterPlatforms(platformName, "message", message);
     return "success"
+
+def getPlatformByToken(token):
+    for platform in json.loads(platforms):
+        if platform['token'] == request.json['token']:
+            return platform['name']
+    abort(401)
+
+def forwardToOhterPlatforms(platformName, method, data):
+    for platform in json.loads(platforms):
+        if platform['name'] != platformName:
+            endpoint = platform['endpoint'] + method
+            requests.post(url=endpoint, data=json.dumps(data), headers=headers)
+
 
 
 if __name__ == '__main__':
