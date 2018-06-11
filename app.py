@@ -19,6 +19,23 @@ def get_users():
     return jsonify({'users': users})
 
 
+@app.route('/platforms', methods=['GET'])
+def get_platforms():
+    platformsList = [];
+    jsonPlatform = {};
+
+    for platform in json.loads(platforms):
+        endpoint = platform['endpoint'] + "users"
+        r = requests.get(url=endpoint, headers=headers)
+
+        jsonPlatform['name'] = platform['name']
+        jsonPlatform['users'] = r.json()['users']
+        jsonPlatform['supportAudio'] = platform['supportAudio']
+        jsonPlatform['supportImage'] = platform['supportImage']
+        platformsList.append(jsonPlatform)
+    return jsonify({'platforms': platformsList})
+
+
 
 @app.route('/user', methods=['POST'])
 def new_user():
