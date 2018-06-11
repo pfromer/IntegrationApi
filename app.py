@@ -21,11 +21,11 @@ def get_users():
 
 @app.route('/platforms', methods=['GET'])
 def get_platforms():
-    platformsList = [];
+    platformsList = []
 
     for platform in json.loads(platforms):
         endpoint = platform['endpoint'] + "users"
-        jsonPlatform = {};
+        jsonPlatform = {}
         r = requests.get(url=endpoint, headers=headers)
         jsonPlatform['name'] = platform['name']
         jsonPlatform['users'] = r.json()['users']
@@ -41,7 +41,7 @@ def new_user():
     if not request.json:
         abort(400)
 
-    platformName = getPlatformByToken(request.json['token']);
+    platformName = getPlatformByToken(request.json['token'])
 
     user = {
         "id": request.json['id'],
@@ -49,7 +49,7 @@ def new_user():
         "platform": platformName
     }
 
-    forwardToOhterPlatforms(platformName, "user", user);
+    forwardToOhterPlatforms(platformName, "user", user)
     return "success"
 
 
@@ -59,7 +59,7 @@ def new_room():
     if not request.json:
         abort(400)
 
-    platformName = getPlatformByToken(request.json['token']);
+    platformName = getPlatformByToken(request.json['token'])
 
     room = {
         "id": request.json['id'],
@@ -69,7 +69,7 @@ def new_room():
         "type": request.json['type']
     }
 
-    forwardToOhterPlatforms(platformName, "room", room);
+    forwardToOhterPlatforms(platformName, "room", room)
     return "success"
 
 
@@ -78,7 +78,7 @@ def new_message():
     if not request.json:
         abort(400)
 
-    platformName = getPlatformByToken(request.json['token']);
+    platformName = getPlatformByToken(request.json['token'])
 
     message = {
         "roomOriginalPlatform": request.json['roomOriginalPlatform'],
@@ -88,7 +88,7 @@ def new_message():
         "text": request.json['text']
     }
 
-    forwardToOhterPlatforms(platformName, "message", message);
+    forwardToOhterPlatforms(platformName, "message", message)
     return "success"
 
 def getPlatformByToken(token):
