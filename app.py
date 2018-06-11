@@ -22,12 +22,11 @@ def get_users():
 @app.route('/platforms', methods=['GET'])
 def get_platforms():
     platformsList = [];
-    jsonPlatform = {};
 
     for platform in json.loads(platforms):
         endpoint = platform['endpoint'] + "users"
+        jsonPlatform = {};
         r = requests.get(url=endpoint, headers=headers)
-
         jsonPlatform['name'] = platform['name']
         jsonPlatform['users'] = r.json()['users']
         jsonPlatform['supportAudio'] = platform['supportAudio']
