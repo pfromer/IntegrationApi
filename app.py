@@ -23,16 +23,19 @@ def get_users():
 @app.route('/platforms', methods=['GET'])
 def get_platforms():
     platformsList = []
-
     for platform in json.loads(platforms):
         endpoint = platform['endpoint'] + "users"
         jsonPlatform = {}
-        r = requests.get(url=endpoint, headers=headers)
-        jsonPlatform['name'] = platform['name']
-        jsonPlatform['users'] = r.json()['users']
-        jsonPlatform['supportAudio'] = platform['supportAudio']
-        jsonPlatform['supportImage'] = platform['supportImage']
-        platformsList.append(jsonPlatform)
+        try:
+          r = requests.get(url=endpoint, headers=headers, verify=False)
+          jsonPlatform['name'] = platform['name']
+          jsonPlatform['users'] = r.json()['users']
+          jsonPlatform['supportAudio'] = platform['supportAudio']
+          jsonPlatform['supportImage'] = platform['supportImage']
+          platformsList.append(jsonPlatform)
+        except:
+          print(endpoint,sys.exc_info()[0])
+          continue
     return jsonify({'platforms': platformsList})
 
 
