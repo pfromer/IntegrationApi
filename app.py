@@ -2,6 +2,7 @@ from flask import Flask, jsonify, request, abort
 import json
 import requests
 from platforms import platforms
+import sys, argparse
 
 app = Flask(__name__)
 headers = {'content-type': 'application/json'}
@@ -104,6 +105,27 @@ def forwardToOhterPlatforms(platformName, method, data):
             requests.post(url=endpoint, data=json.dumps(data), headers=headers)
 
 
+def check_valid_port(value):
+    try:
+      return int(value)
+    except:
+      raise argparse.ArgumentTypeError("%s is an invalid port" % value)
 
 if __name__ == '__main__':
-    app.run()
+    port = 5000
+    host = '0.0.0.0'
+    https = True
+    
+    parser = argparse.ArgumentParser(description='Lanza un IntegrationApi\
+                                     en el puerto que recibe o en el 5000')
+    parser.add_argument('-s', '--https', action='store_true', help='Utiliza https')
+    parser.add_argument('-p','--port', type=check_valid_port, default=port, required=False,
+                        help='Puerto. Default {}'.format(port))
+
+    args = parser.parse_args()
+    
+    if not args.https:
+        app.run(host=host, port=args.port)
+
+    else:
+        app.run(host=host, port=args.port, ssl_context=('cert.pem', 'key.pem'))
