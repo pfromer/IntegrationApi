@@ -95,6 +95,21 @@ def new_message():
     forwardToOhterPlatforms(platformName, "message", message)
     return "success"
 
+@app.route('/ping', methods=['GET', 'POST'])
+def ping():
+    for platform in json.loads(platforms):
+        endpoint = platform['endpoint'] + "pong"
+        try:
+            r = requests.post(
+              url=endpoint,
+              data=json.dumps({'status': "pong"}),
+              headers=headers,
+              timeout=2
+            )
+        except Exception:
+            pass
+    return jsonify({'status': "ok", "message": "Sent \"pong\" to all platforms"})
+
 def getPlatformByToken(token):
     for platform in json.loads(platforms):
         if platform['token'] == request.json['token']:
