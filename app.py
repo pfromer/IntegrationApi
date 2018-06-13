@@ -15,7 +15,7 @@ def get_users():
     for platform in json.loads(platforms):
         endpoint = platform['endpoint'] + "users"
         platformName = platform['name']
-        r = requests.get(url=endpoint, headers=headers)
+        r = requests.get(url=endpoint, headers=headers, verify=False)
         users[platformName] = r.json()['users']
     return jsonify({'users': users})
 
@@ -72,8 +72,12 @@ def new_room():
         "users": request.json['users'],
         "type": request.json['type']
     }
+	
+    toPlatforms = []
+    for obj in room['users']:
+        toPlatforms.append(list(obj.keys())[0])
 
-    forwardToOhterPlatforms(platformName, "room", room)
+    forwardToPlatforms(platformName, "room", room, toPlatforms)
     return "success"
 
 
@@ -120,8 +124,13 @@ def forwardToOhterPlatforms(platformName, method, data):
     for platform in json.loads(platforms):
         if platform['name'] != platformName:
             endpoint = platform['endpoint'] + method
-            requests.post(url=endpoint, data=json.dumps(data), headers=headers)
+            requests.post(url=endpoint, data=json.dumps(data), headers=headers, verify=False)
 
+def forwardToPlatforms(platformName, method, data, toPlatforms):
+    for platform in json.loads(platforms):
+        if platform['name'] != platformName and (platform['name'] in toPlatforms):
+            endpoint = platform['endpoint'] + method
+            requests.post(url=endpoint, data=json.dumps(data), headers=headers, verify=False)
 
 def check_valid_port(value):
     try:
