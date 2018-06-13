@@ -7,6 +7,12 @@ import sys, argparse
 app = Flask(__name__)
 headers = {'content-type': 'application/json'}
 
+def check_valid_port(value):
+    try:
+      return int(value)
+    except:
+      raise argparse.ArgumentTypeError("%s is an invalid port" % value)
+      
 def getPlatformByToken(token):
     for platform in json.loads(platforms):
         if platform['token'] == request.json['token']:
@@ -124,25 +130,6 @@ def ping():
         except Exception:
             pass
     return jsonify({'status': "ok", "message": "Sent \"pong\" to all platforms"})
-
-def getPlatformByToken(token):
-    for platform in json.loads(platforms):
-        if platform['token'] == request.json['token']:
-            return platform['name']
-    abort(401)
-
-def forwardToOhterPlatforms(platformName, method, data):
-    for platform in json.loads(platforms):
-        if platform['name'] != platformName:
-            endpoint = platform['endpoint'] + method
-            requests.post(url=endpoint, data=json.dumps(data), headers=headers)
-
-
-def check_valid_port(value):
-    try:
-      return int(value)
-    except:
-      raise argparse.ArgumentTypeError("%s is an invalid port" % value)
 
 if __name__ == '__main__':
     port = 5000
