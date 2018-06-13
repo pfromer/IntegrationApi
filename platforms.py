@@ -20,10 +20,18 @@ platforms = """[
     },
     {
         "id": 3,
-        "name": "buatsapp",
-        "endpoint": "http://localhost:8080/api/",
+        "name": "BuasApp",
+        "endpoint": "https://localhost:8080/api/",
         "supportAudio": "True",
         "supportImage": "True",
         "token": "3333"
+    },
+    {
+        "id": 4,
+        "name": "BuasApp2",
+        "endpoint": "https://localhost:8081/api/",
+        "supportAudio": "True",
+        "supportImage": "True",
+        "token": "4444"
     }
 ]"""

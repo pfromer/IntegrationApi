@@ -7,6 +7,17 @@ import sys, argparse
 app = Flask(__name__)
 headers = {'content-type': 'application/json'}
 
+def getPlatformByToken(token):
+    for platform in json.loads(platforms):
+        if platform['token'] == request.json['token']:
+            return platform['name']
+    abort(401)
+
+def forwardToOhterPlatforms(platformName, method, data):
+    for platform in json.loads(platforms):
+        if platform['name'] != platformName:
+            endpoint = platform['endpoint'] + method
+            requests.post(url=endpoint, data=json.dumps(data), headers=headers)
 
 @app.route('/users', methods=['GET'])
 def get_users():
@@ -124,13 +135,8 @@ def forwardToOhterPlatforms(platformName, method, data):
     for platform in json.loads(platforms):
         if platform['name'] != platformName:
             endpoint = platform['endpoint'] + method
-            requests.post(url=endpoint, data=json.dumps(data), headers=headers, verify=False)
+            requests.post(url=endpoint, data=json.dumps(data), headers=headers)
 
-def forwardToPlatforms(platformName, method, data, toPlatforms):
-    for platform in json.loads(platforms):
-        if platform['name'] != platformName and (platform['name'] in toPlatforms):
-            endpoint = platform['endpoint'] + method
-            requests.post(url=endpoint, data=json.dumps(data), headers=headers, verify=False)
 
 def check_valid_port(value):
     try:
