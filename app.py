@@ -23,7 +23,14 @@ def forwardToOhterPlatforms(platformName, method, data):
     for platform in json.loads(platforms):
         if platform['name'] != platformName:
             endpoint = platform['endpoint'] + method
-            requests.post(url=endpoint, data=json.dumps(data), headers=headers)
+            try:
+              r = requests.post(url=endpoint, data=json.dumps(data), headers=headers, verify=False)
+              app.logger.debug('Forwarded to {} :: {}'.format(platform['name'], r))
+            except:
+              app.logger.error('{} :: {}'.format(endpoint, sys.exc_info()))
+              continue
+              
+
 
 @app.route('/users', methods=['GET'])
 def get_users():
@@ -34,6 +41,7 @@ def get_users():
         platformName = platform['name']
         r = requests.get(url=endpoint, headers=headers, verify=False)
         users[platformName] = r.json()['users']
+    
     app.logger.debug('Returning users.\n {}'.format(users))
     return jsonify({'users': users})
 
@@ -54,6 +62,7 @@ def get_platforms():
         except:
           app.logger.error('{} :: {}'.format(endpoint,sys.exc_info()))
           continue
+    
     app.logger.debug('Returning platforms.\n {}'.format(platformsList))
     return jsonify({'platforms': platformsList})
 
@@ -62,9 +71,12 @@ def get_platforms():
 @app.route('/user', methods=['POST'])
 def new_user():
     if not request.json:
+        app.logger.error('{}'.format(sys.exc_info()))
         abort(400)
 
     platformName = getPlatformByToken(request.json['token'])
+    
+    app.logger.debug('New user on the platform {}'.format(platformName))
 
     user = {
         "id": request.json['id'],
@@ -103,6 +115,7 @@ def new_room():
 @app.route('/message', methods=['POST'])
 def new_message():
     if not request.json:
+        app.logger.error('{}'.format(sys.exc_info()))
         abort(400)
 
     platformName = getPlatformByToken(request.json['token'])
@@ -127,12 +140,14 @@ def ping():
               url=endpoint,
               data=json.dumps({'status': "pong"}),
               headers=headers,
-              timeout=2
+              timeout=2,
+              verify=False
             )
         except Exception:
             app.logger.error('{} :: {}'.format(endpoint,sys.exc_info()))
             pass
     return jsonify({'status': "ok", "message": "Sent \"pong\" to all platforms"})
+
 
 if __name__ == '__main__':
     port = 5000
