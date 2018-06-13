@@ -19,16 +19,31 @@ def getPlatformByToken(token):
             return platform['name']
     abort(401)
 
+def forwardToPlatforms(platformName, method, data, toPlatforms):
+    for platform in json.loads(platforms):
+        if platform['name'] == platformName or (platform['name'] not in toPlatforms):
+            return
+        
+        endpoint = platform['endpoint'] + method
+        try:
+            r = requests.post(url=endpoint, data=json.dumps(data), headers=headers, verify=False)
+            app.logger.debug('Forwarded to {} :: {}'.format(platform['name'], r))
+        except:
+            app.logger.error('{} :: {}'.format(endpoint, sys.exc_info()))
+            continue
+
+
 def forwardToOhterPlatforms(platformName, method, data):
     for platform in json.loads(platforms):
-        if platform['name'] != platformName:
-            endpoint = platform['endpoint'] + method
-            try:
-              r = requests.post(url=endpoint, data=json.dumps(data), headers=headers, verify=False)
-              app.logger.debug('Forwarded to {} :: {}'.format(platform['name'], r))
-            except:
-              app.logger.error('{} :: {}'.format(endpoint, sys.exc_info()))
-              continue
+        if platform['name'] == platformName:
+            return
+        endpoint = platform['endpoint'] + method
+        try:
+            r = requests.post(url=endpoint, data=json.dumps(data), headers=headers, verify=False)
+            app.logger.debug('Forwarded to {} :: {}'.format(platform['name'], r))
+        except:
+            app.logger.error('{} :: {}'.format(endpoint, sys.exc_info()))
+            continue
               
 
 
