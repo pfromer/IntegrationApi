@@ -1,8 +1,8 @@
 from flask import Flask, jsonify, request, abort
-import json
-import requests
+import json, requests
 from platforms import platforms
 import sys, argparse
+import logging
 
 app = Flask(__name__)
 headers = {'content-type': 'application/json'}
@@ -12,7 +12,7 @@ def check_valid_port(value):
       return int(value)
     except:
       raise argparse.ArgumentTypeError("%s is an invalid port" % value)
-      
+
 def getPlatformByToken(token):
     for platform in json.loads(platforms):
         if platform['token'] == request.json['token']:
@@ -34,6 +34,7 @@ def get_users():
         platformName = platform['name']
         r = requests.get(url=endpoint, headers=headers, verify=False)
         users[platformName] = r.json()['users']
+    app.logger.debug('Returning users.\n {}'.format(users))
     return jsonify({'users': users})
 
 
@@ -51,8 +52,9 @@ def get_platforms():
           jsonPlatform['supportImage'] = platform['supportImage']
           platformsList.append(jsonPlatform)
         except:
-          print(endpoint,sys.exc_info()[0])
+          app.logger.error('{} :: {}'.format(endpoint,sys.exc_info()))
           continue
+    app.logger.debug('Returning platforms.\n {}'.format(platformsList))
     return jsonify({'platforms': platformsList})
 
 
@@ -128,6 +130,7 @@ def ping():
               timeout=2
             )
         except Exception:
+            app.logger.error('{} :: {}'.format(endpoint,sys.exc_info()))
             pass
     return jsonify({'status': "ok", "message": "Sent \"pong\" to all platforms"})
 
@@ -138,6 +141,7 @@ if __name__ == '__main__':
     
     parser = argparse.ArgumentParser(description='Lanza un IntegrationApi\
                                      en el puerto que recibe o en el 5000')
+    parser.add_argument('-d', '--debug', action='store_true', help='Muestra debug')
     parser.add_argument('-s', '--https', action='store_true', help='Utiliza https')
     parser.add_argument('-p','--port', type=check_valid_port, default=port, required=False,
                         help='Puerto. Default {}'.format(port))
@@ -145,7 +149,7 @@ if __name__ == '__main__':
     args = parser.parse_args()
     
     if not args.https:
-        app.run(host=host, port=args.port)
+        app.run(host=host, port=args.port, debug=args.debug)
 
     else:
-        app.run(host=host, port=args.port, ssl_context=('cert.pem', 'key.pem'))
+        app.run(host=host, port=args.port, debug=args.debug, ssl_context=('cert.pem', 'key.pem'))
