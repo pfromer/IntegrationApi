@@ -32,7 +32,7 @@ def forwardToPlatforms(platformName, method, data, toPlatforms):
         endpoint = platform['endpoint'] + method
         try:
             r = requests.post(url=endpoint, data=json.dumps(data), headers=headers, verify=False)
-            app.logger.debug('Forwarded to {} :: {}'.format(platform['name'], r))
+            app.logger.debug('Forwarded to {} :: {} :: {}'.format(platform['name'], endpoint, r))
         except:
             app.logger.error('{} :: {}'.format(endpoint, sys.exc_info()))
             continue
