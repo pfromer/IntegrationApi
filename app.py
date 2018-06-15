@@ -73,14 +73,14 @@ def get_platforms():
         jsonPlatform = {}
         try:
             r = requests.get(url=endpoint, headers=headers, verify=False)
-            jsonPlatform['name'] = platform['name']
             jsonPlatform['users'] = r.json()['users']
-            jsonPlatform['supportAudio'] = platform['supportAudio']
-            jsonPlatform['supportImage'] = platform['supportImage']
-            platformsList.append(jsonPlatform)
         except:
+            jsonPlatform['users'] = []
             app.logger.error('{} :: {}'.format(endpoint, sys.exc_info()))
-            continue
+        jsonPlatform['name'] = platform['name']
+        jsonPlatform['supportAudio'] = platform['supportAudio']
+        jsonPlatform['supportImage'] = platform['supportImage']
+        platformsList.append(jsonPlatform)
 
     app.logger.debug('Returning platforms.\n {}'.format(platformsList))
     return jsonify({'platforms': platformsList})
